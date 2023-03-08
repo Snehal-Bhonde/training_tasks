@@ -3,12 +3,17 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:training_tasks/Emp_Model.dart';
+import 'package:training_tasks/Sqlite/FormPage.dart';
+import 'package:training_tasks/Sqlite/Records.dart';
 import 'package:training_tasks/blocs/emp_bloc.dart';
 import 'package:training_tasks/blocs/emp_event.dart';
+import 'package:training_tasks/blocs/streamBuilder_ex.dart';
 
 void main() {
   HttpOverrides.global = MyHttpOverrides();
-  runApp( MaterialApp(home: EmpListPage()));
+  //runApp( MaterialApp(home: EmpListPage()));
+  //runApp( MaterialApp(home: StreamBuild()));
+  runApp( MaterialApp(home: RecordsPage()));
 
 }
 
