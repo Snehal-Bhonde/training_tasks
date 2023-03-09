@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:training_tasks/Sqlite/Records.dart';
 import 'package:training_tasks/Sqlite/RegModel.dart';
 import 'package:training_tasks/Sqlite/data_base.dart';
 import 'package:sqflite/sqflite.dart';
 
 
 class RegisterForms extends StatefulWidget{
+  RegisterForm? registerForm;
+  RegisterForms({Key? key, this.registerForm}) : super(key: key);
   @override
   State<RegisterForms> createState()=>RegisterFormState();
   }
@@ -24,8 +27,22 @@ class RegisterFormState extends State<RegisterForms> with InputValidationMixin {
   @override
   void initState() {
     initDb();
+    addRegData();
     super.initState();
   }
+  void addRegData() {
+    if (widget.registerForm != null) {
+      if (mounted) {
+        setState(() {
+          firstNameController.text = widget.registerForm!.firstName!;
+          lastNameController.text = widget.registerForm!.lastName!;
+          mobNoController.text = widget.registerForm!.mobNo!.toString();
+          emailController.text = widget.registerForm!.email!;
+        });
+      }
+    }
+  }
+
   void initDb() async {
     await DatabaseRepository.instance.database;
   }
@@ -61,7 +78,7 @@ class RegisterFormState extends State<RegisterForms> with InputValidationMixin {
                   //maxLength: 30,
                     inputFormatters:[
                       LengthLimitingTextInputFormatter(30),
-
+                      FilteringTextInputFormatter.allow(RegExp('[a-zA-Z]'))
                     ],
                   //validator: validateMobile,
                   validator: (val) {
@@ -79,7 +96,10 @@ class RegisterFormState extends State<RegisterForms> with InputValidationMixin {
                   //validator: validateMobile,
                     inputFormatters:[
                       LengthLimitingTextInputFormatter(30),
+                      FilteringTextInputFormatter.allow(RegExp('[a-zA-Z]'))
+
                     ],
+
                   validator: (val) {
                     // _mobile = val;
                     if (val!.length == 0) {
@@ -131,11 +151,13 @@ class RegisterFormState extends State<RegisterForms> with InputValidationMixin {
                         formGlobalKey.currentState!.reset();
                       }
                     },
-                    child: Text("Submit")),
+                    child: widget.registerForm==null?Text("Submit"):Text("Edit") ),
                 Visibility(
+                  visible: widget.registerForm==null?true:false,
                     child: ElevatedButton(
                     onPressed: () {
-
+    Navigator.push(context, MaterialPageRoute(builder: (context) {
+    return RecordsPage();}));
                     },
                     child: Text("Show all Records")))
               ],
@@ -145,10 +167,16 @@ class RegisterFormState extends State<RegisterForms> with InputValidationMixin {
   }
 
   void addRecord() async {
-    var now = new DateTime.now();
-    var formatter = new DateFormat('yyyy-MM-dd');
-    String formattedDate = formatter.format(now);
-    print("date is $formattedDate");
+
+      var now = new DateTime.now();
+      var formatter = new DateFormat('MM/dd/yyyy hh:mm a');
+      String formattedDate = formatter.format(now);
+      print("date is $formattedDate");
+    if(widget.registerForm!=null) {
+      formattedDate=widget.registerForm!.dateTime.toString();
+      print("date is $formattedDate");
+    }
+
     RegisterForm regForm = RegisterForm(
         firstName: firstNameController.text,
         lastName: lastNameController.text,
@@ -156,7 +184,37 @@ class RegisterFormState extends State<RegisterForms> with InputValidationMixin {
         email: emailController.text,
         dateTime: formattedDate,
     );
-    await DatabaseRepository.instance.insert(registerForm: regForm);
+    if(widget.registerForm==null){
+      await DatabaseRepository.instance.insert(registerForm: regForm).then((value){
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Record Saved')));
+        print("saved");
+      }).catchError((e) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.toString())));
+      });
+    }
+    else{
+      print("update started");
+      RegisterForm regForm = RegisterForm(
+        userId: widget.registerForm!.userId,
+        firstName: firstNameController.text,
+        lastName: lastNameController.text,
+        mobNo: int.parse(mobNoController.text),
+        email: emailController.text,
+        dateTime: formattedDate,
+      );
+      await DatabaseRepository.instance.update(regForm).then((value) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Updated')));
+       // Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => RecordsPage()),(route) => true,);
+        Navigator.of(context).popAndPushNamed("/second");
+      }).catchError((e) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.toString())));
+      });
+
+    }
   }
 
 }

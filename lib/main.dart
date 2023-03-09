@@ -13,7 +13,12 @@ void main() {
   HttpOverrides.global = MyHttpOverrides();
   //runApp( MaterialApp(home: EmpListPage()));
   //runApp( MaterialApp(home: StreamBuild()));
-  runApp( MaterialApp(home: RecordsPage()));
+  runApp( MaterialApp(home: RegisterForms(),
+    debugShowCheckedModeBanner: false,
+    routes: {
+    "/home": (ctx) => RegisterForms(),
+      "/second": (ctx) => RecordsPage(),}
+  ));
 
 }
 

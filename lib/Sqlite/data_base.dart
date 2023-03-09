@@ -106,6 +106,21 @@ create table ${AppConst.tableName} (
     }
   }
 
+  Future<void> update(RegisterForm registerForm) async {
+    try {
+      final db = await instance.database;
+      db.update(
+        AppConst.tableName,
+        registerForm.toMap(),
+        where: '${AppConst.uid} = ?',
+        whereArgs: [registerForm.userId],
+      );
+    } catch (e) {
+      print("update failed");
+      print(e.toString());
+    }
+  }
+
 }
 class AppConst {
   static const String uid = 'userId';

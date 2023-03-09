@@ -2,12 +2,14 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:training_tasks/Sqlite/FormPage.dart';
 import 'package:training_tasks/Sqlite/RegModel.dart';
 import 'package:training_tasks/Sqlite/data_base.dart';
 
 import '../Emp_Model.dart';
 
 class RecordsPage extends StatefulWidget {
+
   @override
   _RecordsPageState createState() => _RecordsPageState();
 }
@@ -20,7 +22,7 @@ class _RecordsPageState extends State<RecordsPage> {
   @override
   void initState() {
     //_newsBloc.add(GetEmpList());
-    getTodos();
+    getRecords();
     super.initState();
   }
 
@@ -70,7 +72,11 @@ class _RecordsPageState extends State<RecordsPage> {
                         children: [
                           ElevatedButton(
                               onPressed: () {
-
+                                Navigator.push(context, MaterialPageRoute(builder: (context) {
+                                  return RegisterForms(
+                                    registerForm: myRegForms[index],
+                                  );
+                                }));
                               },
                               child: Text("Edit")),
                           SizedBox(width: 20,),
@@ -188,7 +194,7 @@ class _RecordsPageState extends State<RecordsPage> {
     );
   }
 
-  void getTodos() async {
+  void getRecords() async {
     await DatabaseRepository.instance.getAllTodos().then((value) {
       setState(() {
         myRegForms = value;
@@ -200,8 +206,9 @@ class _RecordsPageState extends State<RecordsPage> {
     DatabaseRepository.instance.delete(registerForm.userId!).then((value) {
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('Deleted')));
+      Navigator.pop(context);
       setState(() {
-        myRegForms;
+        getRecords();
       });
     }).catchError((e) {
       ScaffoldMessenger.of(context)
